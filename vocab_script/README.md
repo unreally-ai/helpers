@@ -1,4 +1,4 @@
-# top5k.py
+# 5kvocab.py.py
 usage:
 `python3 top5k.py <folder>`
 
