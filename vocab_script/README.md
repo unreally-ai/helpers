@@ -1,7 +1,4 @@
-# helpers
-This repo contains all of the scripts that make your life easier!
-
-## top5k.py
+# top5k.py
 usage:
 `python3 top5k.py <folder>`
 
