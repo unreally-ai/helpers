@@ -1,3 +1,6 @@
+import nltk
+nltk.download('stopwords')
+from nltk.stem import WordNetLemmatizer 
 import sys
 import numpy as np
 import pandas as pd
@@ -11,20 +14,22 @@ import os
 
 custom_stopwords = ["semst", "im"]
 # column of the text
-index = 1
+index = 0
 # csv or txt
 data_type = "csv" 
+##lemmetizer
+lemmatizer = WordNetLemmatizer()
 
 # --- DEFINE PIPELINE FUNCTIONS ---
 
 # takes in string & returns a cleaned string of all non-stop-words
 def preprocess(text):
-    sw = stopwords.words('english')
+    sw = set(stopwords.words('english'))
     text = re.sub(r'[^\w\s]', '', text).lower()
     s = ""
     for word in text.split():
         if word not in sw and word not in custom_stopwords:
-                s += (word + " ")
+                s += (lemmatizer.lemmatize(word) + " ")
     return s
 
 # Takes array of dataframes, returns df with top5k dictionary
@@ -51,7 +56,7 @@ def read_dfs(directory):
     dfs = []
     for filename in directory:
         if data_type == "csv":
-            df = pd.read_csv(filename, header=None)
+            df = pd.read_csv(filename, sep="\t", header=None)
         elif data_type == "txt":
             df = pd.read_csv(filename, sep="\t", header=None)
         dfs.append(df)
