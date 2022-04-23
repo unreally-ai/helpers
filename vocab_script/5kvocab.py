@@ -10,8 +10,10 @@ import os
 # --- USER PARAMETERS ---
 
 custom_stopwords = ["semst", "im"]
-index = 0
-data_type = "csv"
+# column of the text
+index = 1
+# csv or txt
+data_type = "csv" 
 
 # --- DEFINE PIPELINE FUNCTIONS ---
 
@@ -30,8 +32,7 @@ def multidf_vocab(df_arr):
     # create array of cleaned strings
     vocab = []
     for df in df_arr:
-        for i in range(len(df)):
-            # This has the 2nd column hardcoded!! Change it for production
+        for i in range(len(df)-1):
             vocab.append(preprocess(df[index][i]))
     vocab_df = pd.DataFrame(vocab)
     # how do I use counter without turning the vocab array into a df first?
@@ -48,31 +49,26 @@ def tf5k(processed_df):
 # try reading each df
 def read_dfs(directory):
     dfs = []
-    try:
-        for filename in directory: 
-            df = pd.read_csv(filename, sep="\t", header=None) 
-            dfs.append(df)
-            print("dataframes read...")
-            return dfs
-    except:
-        print("reading dataframes failed\nquitting...")
-        sys.exit()
+    for filename in directory:
+        if data_type == "csv":
+            df = pd.read_csv(filename, header=None)
+        elif data_type == "txt":
+            df = pd.read_csv(filename, sep="\t", header=None)
+        dfs.append(df)
+        print("dataframes read...")
+        return dfs
   
 
 # call all of the pipeline functions
 def pipeline(dfs):
     # --PIPELINE---
-    try:
-        data = multidf_vocab(dfs)
-        top5k = tf5k(data)
+    data = multidf_vocab(dfs)
+    top5k = tf5k(data)
         
-        # save to file
-        top5k.to_csv('./vocab.csv')
+    # save to file
+    top5k.to_csv('./vocab.csv')
+    print("created top 5k dictionary")
 
-        print("created top 5k dictionary")
-    except:
-        print("pipeline error!\nquitting...")
-        sys.exit()
 
 # --- START ---
 
