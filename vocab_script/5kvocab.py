@@ -1,5 +1,3 @@
-import nltk
-nltk.download('stopwords')
 from nltk.stem import WordNetLemmatizer 
 import sys
 import numpy as np
