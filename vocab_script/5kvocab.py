@@ -7,10 +7,14 @@ from nltk.corpus import stopwords
 import glob
 import os
 
+# --- USER PARAMETERS ---
+
+custom_stopwords = ["semst", "im"]
+index = 0
+data_type = "csv"
 
 # --- DEFINE PIPELINE FUNCTIONS ---
 
-custom_stopwords = ["semst", "im"]
 # takes in string & returns a cleaned string of all non-stop-words
 def preprocess(text):
     sw = stopwords.words('english')
@@ -28,7 +32,7 @@ def multidf_vocab(df_arr):
     for df in df_arr:
         for i in range(len(df)):
             # This has the 2nd column hardcoded!! Change it for production
-            vocab.append(preprocess(df[2][i]))
+            vocab.append(preprocess(df[index][i]))
     vocab_df = pd.DataFrame(vocab)
     # how do I use counter without turning the vocab array into a df first?
     # count appearance of each word & create frequency dataframe
@@ -77,7 +81,8 @@ if len(sys.argv) < 2 or len(sys.argv) > 2:
     print("usage:\n python3 5kvocab.py <folder>")
 else:
     path = sys.argv[1]
-    directory = glob.glob(os.path.join(path , "*.txt")) 
+    select = f"*.{data_type}"
+    directory = glob.glob(os.path.join(path , select)) 
     print("dir:", directory)
     
     dfs = read_dfs(directory)
