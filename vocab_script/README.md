@@ -9,5 +9,4 @@ csv with the top 5k most common words of all data frames combined
 to the current directory.
 
 IMPORTANT:
-> Note that the row at which it looks for is currently hard-coded to 2.
-> Furthermore, it only look for .txt files in the directory!
+> Note that you have to specify what kind of data sets you want to read & at which index
