@@ -15,8 +15,8 @@ from nltk.stem import WordNetLemmatizer
 
 # -- PARAMETERS --
 CUSTOM_SW = ["semst","u"] # TODO: add to actual stopwords
-VOCAB_PATH = "vocab_script/vocab.csv"
-BODY_PATH = "vocab_script/vocab_bodies.csv"
+VOCAB_PATH = "../vocab_script/vocab.csv"
+BODY_PATH = "../vocab_script/vocab_bodies.csv"
 USE_LEMMATIZER = True
 
 test_string = "ISIS ISIS us us says you claims foley"
@@ -83,4 +83,10 @@ body_df = pd.DataFrame(body_tf.toarray())
 c_similarity_df = pd.DataFrame(c_similarity)
 
 almighty = pd.concat([claim_df,c_similarity_df,body_df],axis=1)
+almighty = almighty.to_numpy()
 print(almighty)
+
+# TODO für Raphael/Ruben:
+# - Warum das vocab script nicht genau 5k groß ist
+#   - Falsche Lemmatization?
+# - Warum wörter wie "u" im vocab vorkommen
