@@ -72,12 +72,19 @@ def create_tfidf(bow):
     tfreq = tfreq_vec.fit_transform(bow)
     return tfreq
 
-print(create_tf(create_bow(test_string,VOCAB_PATH)))
-print(create_tf(create_bow(test_string,BODY_PATH)))
+claim_tf = create_tf(create_bow(test_string,VOCAB_PATH))
+body_tf = create_tf(create_bow(test_string,BODY_PATH))
 claims = create_tfidf(create_bow(test_string,VOCAB_PATH))
 bodies = create_tfidf(create_bow(test_body,BODY_PATH))
+c_similarity = cosine_similarity(claims,bodies)
 
-print(cosine_similarity(claims,bodies))
+claim_df = pd.DataFrame(claim_tf.toarray()) 
+body_df = pd.DataFrame(body_tf.toarray())
+c_similarity_df = pd.DataFrame(c_similarity)
+
+almighty = pd.concat([claim_df,c_similarity_df,body_df],axis=1)
+print(almighty)
+
 # TODO für Raphael/Ruben:
 # - Warum das vocab script nicht genau 5k groß ist
 #   - Falsche Lemmatization?
