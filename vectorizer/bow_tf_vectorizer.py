@@ -84,8 +84,3 @@ c_similarity_df = pd.DataFrame(c_similarity)
 
 almighty = pd.concat([claim_df,c_similarity_df,body_df],axis=1)
 print(almighty)
-
-# TODO für Raphael/Ruben:
-# - Warum das vocab script nicht genau 5k groß ist
-#   - Falsche Lemmatization?
-# - Warum wörter wie "u" im vocab vorkommen
