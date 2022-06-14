@@ -1,12 +1,13 @@
-
-from base64 import decode
-from numpy import vectorize
+from bz2 import compress
+import sys
 import pandas as pd
+import numpy as np
+
+import torch
 
 from sklearn.feature_extraction import text
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfTransformer
-from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.feature_extraction.text import CountVectorizer
 
 from sklearn.metrics.pairwise import cosine_similarity
@@ -15,12 +16,12 @@ from nltk.stem import WordNetLemmatizer
 
 # -- PARAMETERS --
 CUSTOM_SW = ["semst","u"] # TODO: add to actual stopwords
-VOCAB_PATH = "../vocab_script/vocab.csv"
-BODY_PATH = "../vocab_script/vocab_bodies.csv"
+VOCAB_PATH = "vocab_script/vocab_headlines.csv"
+BODY_PATH = "vocab_script/vocab_bodies.csv"
 USE_LEMMATIZER = True
 
 test_string = "ISIS ISIS us us says you claims foley"
-test_body = "apple said you would report one woman and Isis us says your claim was foley"
+test_body = "apple said you would report one woman and Isis us says your claim was foley apple said you would report one woman and Isis us says your claim was foley apple said you would report one woman and Isis us says your claim was foley apple said you would report one woman and Isis us says your claim was foley apple said you would report one woman and Isis us says your claim was foley apple said you would report one woman and Isis us says your claim was foley apple said you would report one woman and Isis us says your claim was foley apple said you would report one woman and Isis us says your claim was foley apple said you would report one woman and Isis us says your claim was foley apple said you would report one woman and Isis us says your claim was foley apple said you would report one woman and Isis us says your claim was foley "
 vocab_df = pd.read_csv(VOCAB_PATH, header=None)
 # takes [string], returns lowercased & lemmatized [string]
 def lem_str(in_string):
@@ -43,7 +44,6 @@ def load_vectorizer(path):
         max_features=5000,
         vocabulary=vocab_df[1]
     )
-    print(bow_vectorizer.vocabulary)
 
     return bow_vectorizer
 
@@ -54,7 +54,6 @@ def create_bow(in_string, path):
         bow = bow_vectorizer.fit_transform(lem_str(in_string), y=None)
     else:
         bow = bow_vectorizer.fit_transform([in_string], y=None)
-    print(bow)
     return bow
 
 # TODO: 
@@ -72,21 +71,40 @@ def create_tfidf(bow):
     tfreq = tfreq_vec.fit_transform(bow)
     return tfreq
 
-claim_tf = create_tf(create_bow(test_string,VOCAB_PATH))
-body_tf = create_tf(create_bow(test_string,BODY_PATH))
-claims = create_tfidf(create_bow(test_string,VOCAB_PATH))
-bodies = create_tfidf(create_bow(test_body,BODY_PATH))
-c_similarity = cosine_similarity(claims,bodies)
+labels = {
+        "agree": torch.tensor([0]),
+        "disagree": torch.tensor([1]),
+        "discuss": torch.tensor([2]),
+        "unrelated": torch.tensor([3]),
+    }
 
-claim_df = pd.DataFrame(claim_tf.toarray()) 
-body_df = pd.DataFrame(body_tf.toarray())
-c_similarity_df = pd.DataFrame(c_similarity)
+def find_label(item):
+    print(labels[item])
+    return labels[item]
 
-almighty = pd.concat([claim_df,c_similarity_df,body_df],axis=1)
-almighty = almighty.to_numpy()
-print(almighty)
+data = pd.read_csv("/Users/vince/unreally/helpers-main/train_data.csv")
+terror = []
+for i in range(len(data)):
+    claim_tf = create_tf(create_bow(data['head'][i],VOCAB_PATH))
+    body_tf = create_tf(create_bow(data['body'][i],BODY_PATH)) #'head'
+    claims = create_tfidf(create_bow(data['head'][i],VOCAB_PATH))
+    bodies = create_tfidf(create_bow(data['body'][i],BODY_PATH))
+    c_similarity = cosine_similarity(claims,bodies)
 
-# TODO für Raphael/Ruben:
-# - Warum das vocab script nicht genau 5k groß ist
-#   - Falsche Lemmatization?
-# - Warum wörter wie "u" im vocab vorkommen
+    claim_df = pd.DataFrame(claim_tf.toarray()) 
+    body_df = pd.DataFrame(body_tf.toarray())
+    c_similarity_df = pd.DataFrame(c_similarity)
+
+    almighty = pd.concat([claim_df,c_similarity_df,body_df],axis=1)
+    almighty = almighty.to_numpy()
+    almighty = torch.from_numpy(almighty)
+    
+    terror.append([almighty,find_label(data['stance'][i]),data['ID'][i]])
+
+df = pd.DataFrame (terror, columns = ['vector','stance','ID'])
+# create csv file
+print(df['vector'][2])
+print(df['vector'][2][0][30])
+np.set_printoptions(threshold=sys.maxsize)
+df.to_pickle('terror4.3.pkl')
+print(df)
